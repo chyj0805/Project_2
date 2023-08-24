@@ -1,0 +1,7 @@
+import streamlit as st
+
+option = st.selectbox(
+    'Which sector would you like to focus on?',
+    ('Energy', 'Tech', 'Financial'))
+
+st.write('You selected:', option)
