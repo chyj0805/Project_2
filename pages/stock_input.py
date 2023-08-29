@@ -8,6 +8,8 @@ import streamlit as st
 import os
 import hvplot.pandas
 import time
+import requests
+from alpha_vantage.timeseries import TimeSeries
 
 st.set_page_config(
     page_title="Sector Selection",
@@ -17,7 +19,8 @@ st.set_page_config(
 
 st.markdown("# Stock sector selection")
 st.sidebar.header("Stock sector selection")
-
+stock_symbol = ""
+placeholder_for_selectbox = st.empty()
 #setting tabs using extras
 tab = stx.tab_bar(data=[
     stx.TabBarItemData(id="Sector Select", title="📈 Sector Select", description="Choose from three sectors"),
@@ -31,27 +34,30 @@ st.write('You selected:', option)
 
 st.title("Sector Selection")
 if tab == "Sector Select":
-    with st.form('Sector Select'):
-        submit_button = st.form_submit_button("Submit!")
-        placeholder_for_selectbox = st.empty()
-        
-        
-        with placeholder_for_selectbox:       
-            if option == 'Energy':
-                energy_option = st.selectbox('Please choose one of the sample stocks ',
-                                                ('XOM','CVX','ENB'))
-            elif option == 'Tech':
-                tech_option = st.selectbox('Please choose one of the sample stocks ',
-                                                ('APPL','NVDA','AVGO'))    
-            else:
-                fin_option = st.selectbox('Please choose one of the sample stocks ',
-                                                ('WFC','BAC','JPM'))
-            
-elif tab == "Manual Input":
-    with st.form("Manual Input"):
-        manual_submit_button = st.form_submit_button("Submit!")
-    symbol = st.text_input("Enter your other option...")
-    st.info(
-        f":white_check_mark: The written option is **{symbol}**")
+    with placeholder_for_selectbox:       
+        if option == 'Energy':
+            stock_symbol = str('IYE')
+        elif option == 'Tech':
+            stock_symbol = str('IYW')    
+        else:
+            stock_symbol = str('IYF')
+    ts = TimeSeries(key='4FHTO2GAT3NL1EZ8', output_format='pandas')
+    data, meta_data = ts.get_intraday(symbol=stock_symbol,interval='1min', outputsize='full')
+    st.dataframe(data)
 else:
-        st.error("`st.form_submit_button` has not been clicked yet")
+        st.error("")
+
+if tab == "Manual Input":
+    stock_symbol = st.text_input("Enter your other option...")
+    st.info(
+        f":white_check_mark: The written option is **{stock_symbol}**")
+else:
+        st.error("")
+if placeholder_for_selectbox is st.empty():
+    n_years = st.empty()
+else:
+     st.write("thank you")
+    # n_years = st.slider('Years of predicition:', 1 ,4)
+    # ts = TimeSeries(key='4FHTO2GAT3NL1EZ8', output_format='pandas')
+    # data, meta_data = ts.get_intraday(symbol=stock_symbol,interval='1min', outputsize='full')
+    # st.dataframe(data)
