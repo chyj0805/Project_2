@@ -1,3 +1,34 @@
+import pandas as pd
+import alpha_vantage
+
+class AlphaVantageClient:
+    def __init__(self, api_key):
+        self.api_key = api_key
+        self.av_client = alpha_vantage.AlphaVantage(key=api_key, output_format='pandas')
+        
+    def fetch_stock_data(self, symbol, interval='daily'):
+        data, _ = self.av_client.get_timeseries(symbol=symbol, interval=interval, outputsize='full')
+        return data
+
+def create_dataframe_from_features(api_key, symbol, features, interval='daily'):
+    av_client = AlphaVantageClient(api_key)
+    stock_data, _ = av_client.fetch_stock_data(symbol, interval=interval)
+    
+    selected_features = ['date', *features]
+    selected_data = stock_data[selected_features]
+    
+    return selected_data
+
+# Example usage
+api_key = "your_alpha_vantage_api_key"
+symbol = "AAPL"
+selected_features = ['open', 'high', 'low', 'close', 'volume']
+interval = 'daily'
+
+dataframe = create_dataframe_from_features(api_key, symbol, selected_features, interval)
+print(dataframe)
+
+
 tech_data = {
     'Apple Inc.': 'AAPL',
     'Microsoft Corporation': 'MSFT',

@@ -1,5 +1,14 @@
 import streamlit as st
+import pandas as pd
+from alpha_vantage.timeseries import TimeSeries
 
+# Your Alpha Vantage API key
+ALPHA_VANTAGE_API_KEY = "4FHTO2GAT3NL1EZ8"
+
+def fetch_stock_data(symbol):
+    ts = TimeSeries(key=ALPHA_VANTAGE_API_KEY, output_format='pandas')
+    data, meta_data = ts.get_daily(symbol=symbol, outputsize='compact')
+    return data
 # Energy data dictionary
 energy_data = {
     'Exxon Mobil Corporation': 'XOM',
@@ -184,6 +193,13 @@ def main():
             st.write(f"Ticker Symbol for {selected_company}: {ticker_symbol}")
         else:
             st.write("Please select a technology company.")
+
+         # Fetch historical stock data using Alpha Vantage API
+            stock_data = fetch_stock_data(ticker_symbol)
+
+            # Display the fetched data
+            st.write("Historical Stock Data:")
+            st.write(stock_data)
 
 if __name__ == "__main__":
     main()
