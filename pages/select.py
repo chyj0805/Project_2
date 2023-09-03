@@ -1,14 +1,8 @@
 import streamlit as st
 import pandas as pd
 from alpha_vantage.timeseries import TimeSeries
-
 # Your Alpha Vantage API key
 ALPHA_VANTAGE_API_KEY = "4FHTO2GAT3NL1EZ8"
-
-def fetch_stock_data(symbol):
-    ts = TimeSeries(key=ALPHA_VANTAGE_API_KEY, output_format='pandas')
-    data, meta_data = ts.get_daily(symbol=symbol, outputsize='compact')
-    return data
 # Energy data dictionary
 energy_data = {
     'Exxon Mobil Corporation': 'XOM',
@@ -59,7 +53,7 @@ energy_data = {
 
 # Financial data dictionary
 finn_data = {
-    'Berkshire Hathaway Inc.': 'BRK.B',
+    'Berkshire Hathaway Inc.': 'BRK-B',
     'JPMorgan Chase & Co.': 'JPM',
     'Bank of America Corporation': 'BAC',
     'Wells Fargo & Company': 'WFC',
@@ -165,6 +159,11 @@ tech_data = {
     'Hewlett Packard Enterprise Company': 'HPE'
 }
 
+def fetch_stock_data(ticker_symbol):
+    ts = TimeSeries(key='4FHTO2GAT3NL1EZ8', output_format='pandas')
+    data, meta_data = ts.get_intraday(symbol=ticker_symbol,interval='1min', outputsize='full')
+    return data
+
 def main():
     st.title("Company Ticker Lookup")
 
@@ -177,6 +176,12 @@ def main():
         if selected_company in energy_data:
             ticker_symbol = energy_data[selected_company]
             st.write(f"Ticker Symbol for {selected_company}: {ticker_symbol}")
+            # Fetch historical stock data using Alpha Vantage API
+            stock_data = fetch_stock_data(ticker_symbol)
+            # Display the DataFrame using st.dataframe
+            with st.container():
+                st.dataframe(stock_data)
+        
         else:
             st.write("Please select an energy company.")
     elif selected_category == "Financial":
@@ -184,6 +189,11 @@ def main():
         if selected_company in finn_data:
             ticker_symbol = finn_data[selected_company]
             st.write(f"Ticker Symbol for {selected_company}: {ticker_symbol}")
+            # Fetch historical stock data using Alpha Vantage API
+            stock_data = fetch_stock_data(ticker_symbol)
+            # Display the DataFrame using st.dataframe
+            with st.container():
+                st.dataframe(stock_data)
         else:
             st.write("Please select a financial company.")
     elif selected_category == "Technology":
@@ -191,15 +201,19 @@ def main():
         if selected_company in tech_data:
             ticker_symbol = tech_data[selected_company]
             st.write(f"Ticker Symbol for {selected_company}: {ticker_symbol}")
+            st.header((f"{selected_company}Historical Stock Data:"))
+            # Fetch historical stock data using Alpha Vantage API
+            stock_data = fetch_stock_data(ticker_symbol)
+            # Display the DataFrame using st.dataframe
+            with st.container():
+                st.dataframe(stock_data)
         else:
             st.write("Please select a technology company.")
 
-         # Fetch historical stock data using Alpha Vantage API
-            stock_data = fetch_stock_data(ticker_symbol)
+        
+        
+        
 
-            # Display the fetched data
-            st.write("Historical Stock Data:")
-            st.write(stock_data)
 
 if __name__ == "__main__":
     main()
