@@ -1,9 +1,22 @@
-import streamlit as st
-import pandas as pd
-from alpha_vantage.timeseries import TimeSeries
+
 from streamlit_extras.dataframe_explorer import dataframe_explorer
-from dotenv import load_dotenv
-# Energy data dictionary
+from streamlit_extras.chart_container import chart_container
+import extra_streamlit_components as stx
+from markdownlit import mdlit
+import pandas as pd
+import datetime
+import streamlit as st
+import os
+import hvplot.pandas
+import time
+from colabs.Yujie.Class.SMTPc import StockModelTrainerPredictor
+
+st.set_page_config(
+    page_title="Data fetch and preperations",
+    page_icon="📈",
+    layout="wide",
+)
+
 energy_data = {
     'Exxon Mobil Corporation': 'XOM',
     'Chevron Corporation': 'CVX',
@@ -158,17 +171,16 @@ tech_data = {
     'Monolithic Power Systems, Inc.': 'MPWR',
     'Hewlett Packard Enterprise Company': 'HPE'
 }
-
-def fetch_stock_data(ticker_symbol):
-    load_dotenv()
-    ts = TimeSeries(key='ALPHA_VANTAGE_API_KEY', output_format='pandas')
-    data, meta_data = ts.get_intraday(symbol=ticker_symbol,interval='1min', outputsize='full')
-    return data
-
+def convert_df(df):
+    # IMPORTANT: Cache the conversion to prevent computation on every rerun
+    return df.to_csv().encode('utf-8')
 def main():
-    st.title("Company Ticker Lookup")
+    st.title("Data preperations")
 
-    # Dropdown to select a category
+     # Initialize predictor as None
+    predictor = None
+    data_is_ready = False
+# Dropdown to select a category
     selected_category = st.selectbox("Select a Category", ["Energy", "Financial", "Technology"])
 
     # Display the selected category's dropdown and ticker symbol
@@ -177,44 +189,54 @@ def main():
         if selected_company in energy_data:
             ticker_symbol = energy_data[selected_company]
             st.write(f"Ticker Symbol for {selected_company}: {ticker_symbol}")
-            # Fetch historical stock data using Alpha Vantage API
-            stock_data = fetch_stock_data(ticker_symbol)
-            # Display the DataFrame using st.dataframe
-            with st.container():
-                st.dataframe(stock_data)
-        
-        else:
-            st.write("Please select an energy company.")
+            # Initialize the StockModelTrainerPredictor class with the selected ticker symbol
+            predictor = StockModelTrainerPredictor(ticker_symbol)
+   
     elif selected_category == "Financial":
         selected_company = st.selectbox("Select a Financial Company", list(finn_data.keys()))
         if selected_company in finn_data:
             ticker_symbol = finn_data[selected_company]
             st.write(f"Ticker Symbol for {selected_company}: {ticker_symbol}")
-            # Fetch historical stock data using Alpha Vantage API
-            stock_data = fetch_stock_data(ticker_symbol)
-            # Display the DataFrame using st.dataframe
-            with st.container():
-                st.dataframe(stock_data)
-        else:
-            st.write("Please select a financial company.")
+            # Initialize the StockModelTrainerPredictor class with the selected ticker symbol
+            predictor = StockModelTrainerPredictor(ticker_symbol)
+
     elif selected_category == "Technology":
         selected_company = st.selectbox("Select a Technology Company", list(tech_data.keys()))
         if selected_company in tech_data:
             ticker_symbol = tech_data[selected_company]
             st.write(f"Ticker Symbol for {selected_company}: {ticker_symbol}")
-            st.header((f"{selected_company}Historical Stock Data:"))
-            # Fetch historical stock data using Alpha Vantage API
-            stock_data = fetch_stock_data(ticker_symbol)
-            # Display the DataFrame using st.dataframe
-            with st.container():
-                st.dataframe(stock_data)
-        else:
-            st.write("Please select a technology company.")
+            # Initialize the StockModelTrainerPredictor class with the selected ticker symbol
+            predictor = StockModelTrainerPredictor(ticker_symbol)
 
-        
-        
-        
+    if predictor is not None:
+        # Button to fetch and combine data for model training
+        fetch_data_button = st.button("Fetch Data for Training")
+        if fetch_data_button:
+            with st.spinner("Fetching and combining data for training..."):
+                # Use the class method to fetch and combine data
+                combined_data = predictor.get_combined_data()
+            
+            # Display the combined data as a DataFrame
+            st.success("Data is ready for model training!")
+            st.dataframe(combined_data)
 
+            # Update the data_is_ready flag
+            data_is_ready = True
 
+        # Check the data_is_ready flag to determine whether to show the training button
+        if data_is_ready:
+            # Button to train the model
+            train_model_button = st.button("Train Model")
+            if train_model_button:
+                # Call the train_model() method from your class
+                predictor.train_model()
+            # Button to download the combined data as CSV
+            csv = convert_df(combined_data)
+            download_csv_button = st.download_button(label="Download CSV",
+                                data=csv,
+                                file_name = f"{ticker_symbol}_{datetime.datetime.now().strftime('%Y-%m-%d')}.csv",
+                                mime='text/csv')
+
+            
 if __name__ == "__main__":
     main()

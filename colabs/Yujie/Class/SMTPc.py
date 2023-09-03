@@ -267,59 +267,60 @@ class StockModelTrainerPredictor:
         self.predictions = self.scaler_y.inverse_transform(predictions_scaled)
 
     def visualize_results_whole(self):
+       def visualize_results_whole(self):
         # First Day
-        plt.figure(figsize=(15, 6))
         y_test_first_day = self.y_test[:, 0]
         y_test_inv_first_day = self.scaler_y.inverse_transform(y_test_first_day)
         predictions_first_day = self.predictions[:, 0]
+        plt.figure(figsize=(15, 6))
         plt.plot(y_test_inv_first_day, label='True - First Day')
         plt.plot(predictions_first_day, label='Predicted - First Day')
         plt.title(f'{self.ticker} Stock Price Prediction - First Day')
         plt.xlabel('Trading Day')
         plt.ylabel('Stock Price')
         plt.legend()
-        plt.show()
+        st.pyplot(plt)
 
         # Last Day
-        plt.figure(figsize=(15, 6))
         y_test_last_day = self.y_test[:, -1]
         y_test_inv_last_day = self.scaler_y.inverse_transform(y_test_last_day)
         predictions_last_day = self.predictions[:, -1]
+        plt.figure(figsize=(15, 6))
         plt.plot(y_test_inv_last_day, label='True - Last Day')
         plt.plot(predictions_last_day, label='Predicted - Last Day')
         plt.title(f'{self.ticker} Stock Price Prediction - Last Day')
         plt.xlabel('Trading Day')
         plt.ylabel('Stock Price')
         plt.legend()
-        plt.show()
+        st.pyplot(plt)
 
         # 5th Day
-        plt.figure(figsize=(15, 6))
         day_index = 4  # Index 4 corresponds to the 5th day
         y_test_5th_day = self.y_test[:, day_index]
         y_test_inv_5th_day = self.scaler_y.inverse_transform(y_test_5th_day)
         predictions_5th_day = self.predictions[:, day_index]
+        plt.figure(figsize=(15, 6))
         plt.plot(y_test_inv_5th_day, label='True - 5th Day')
         plt.plot(predictions_5th_day, label='Predicted - 5th Day')
         plt.title(f'{self.ticker} Stock Price Prediction - 5th Day')
         plt.xlabel('Trading Day')
         plt.ylabel('Stock Price')
         plt.legend()
-        plt.show()
+        st.pyplot(plt)
 
         # 30th Day
-        plt.figure(figsize=(15, 6))
         day_index = 29
         y_test_30th_day = self.y_test[:, day_index]
         y_test_inv_30th_day = self.scaler_y.inverse_transform(y_test_30th_day)
         predictions_30th_day = self.predictions[:, day_index]
+        plt.figure(figsize=(15, 6))
         plt.plot(y_test_inv_30th_day, label='True - 30th Day')
         plt.plot(predictions_30th_day, label='Predicted - 30th Day')
         plt.title(f'{self.ticker} Stock Price Prediction - 30th Day')
         plt.xlabel('Trading Day')
         plt.ylabel('Stock Price')
         plt.legend()
-        plt.show()
+        st.pyplot(plt)
 
     def visualize_results_60days(self):
         # Reverse normalize y_test for comparison with the original data
@@ -339,7 +340,7 @@ class StockModelTrainerPredictor:
             plt.title(f'{self.ticker} Actual vs. Predicted Prices for the Next 60 Days - Sample {sample_index+1}')
             plt.legend()
             plt.show()
-
+            st.pyplot(plt)
     def calculate_average_rmse(self):
         # Initialize an empty list to store RMSE for each window
         rmse_values = []
@@ -435,5 +436,5 @@ class StockModelTrainerPredictor:
         selected_ticks = future_dates[::10]  # Show every 10th date
         plt.xticks(selected_ticks, rotation=45)
 
-
+        st.pyplot(plt)
         plt.show()
