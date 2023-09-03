@@ -1,9 +1,22 @@
-import streamlit as st
-import pandas as pd
-from alpha_vantage.timeseries import TimeSeries
+
 from streamlit_extras.dataframe_explorer import dataframe_explorer
-from dotenv import load_dotenv
-# Energy data dictionary
+from streamlit_extras.chart_container import chart_container
+import extra_streamlit_components as stx
+from markdownlit import mdlit
+import pandas as pd
+import datetime
+import streamlit as st
+import os
+import hvplot.pandas
+import time
+from colabs.Yujie.Class.SMTPc import StockModelTrainerPredictor
+
+st.set_page_config(
+    page_title=" LSTM Model",
+    page_icon="📈",
+    layout="wide",
+)
+
 energy_data = {
     'Exxon Mobil Corporation': 'XOM',
     'Chevron Corporation': 'CVX',
@@ -158,62 +171,135 @@ tech_data = {
     'Monolithic Power Systems, Inc.': 'MPWR',
     'Hewlett Packard Enterprise Company': 'HPE'
 }
-
-def fetch_stock_data(ticker_symbol):
-    load_dotenv()
-    ts = TimeSeries(key='ALPHA_VANTAGE_API_KEY', output_format='pandas')
-    data, meta_data = ts.get_intraday(symbol=ticker_symbol,interval='1min', outputsize='full')
-    return data
-
 def main():
-    st.title("Company Ticker Lookup")
-
-    # Dropdown to select a category
+    st.title("LSTM Training")
+# Dropdown to select a category
     selected_category = st.selectbox("Select a Category", ["Energy", "Financial", "Technology"])
-
+   
     # Display the selected category's dropdown and ticker symbol
     if selected_category == "Energy":
         selected_company = st.selectbox("Select an Energy Company", list(energy_data.keys()))
         if selected_company in energy_data:
-            ticker_symbol = energy_data[selected_company]
-            st.write(f"Ticker Symbol for {selected_company}: {ticker_symbol}")
-            # Fetch historical stock data using Alpha Vantage API
-            stock_data = fetch_stock_data(ticker_symbol)
-            # Display the DataFrame using st.dataframe
-            with st.container():
-                st.dataframe(stock_data)
-        
+            ticker = energy_data[selected_company]
+            st.write(f"Ticker Symbol for {selected_company}: {ticker}")
+            # Initialize the StockModelTrainerPredictor class with the selected ticker symbol
+            predictor = StockModelTrainerPredictor(ticker)
+
+        # Button to fetch and preprocess data for model training
+        train_model_button = st.button("Fetch and Preprocess Data for Training")
+        if train_model_button:
+            with st.spinner("Fetching and preprocessing data for training..."):
+                # Use the class method to fetch and preprocess data
+                combined_data = predictor.preprocess_data()
+
+                # Display the combined data as a DataFrame
+                st.success("Data is ready for model training!")
+                st.dataframe(combined_data)
+
+                # Set data_is_ready to True when data is successfully fetched and preprocessed
+                data_is_ready = True
+
+                # Check if data is ready for model training
+                if data_is_ready:
+                    # Button to train the model
+                    train_model_button = st.button("Train Model")
+
+                if train_model_button:
+                    # Call the train_model() method from your class
+                    trained_model = predictor.train_model()
+
+                    # Save the trained model as a .h5 file
+                    model_filename = f"{selected_company}_model.h5"
+                    trained_model.save(model_filename)
+
+                    # Provide a link to download the model file
+                    st.success("Model training complete! You can download the model below.")
+                    st.markdown(f"**[Download Trained Model]({model_filename})**", unsafe_allow_html=True)
         else:
             st.write("Please select an energy company.")
+   
     elif selected_category == "Financial":
         selected_company = st.selectbox("Select a Financial Company", list(finn_data.keys()))
         if selected_company in finn_data:
-            ticker_symbol = finn_data[selected_company]
-            st.write(f"Ticker Symbol for {selected_company}: {ticker_symbol}")
-            # Fetch historical stock data using Alpha Vantage API
-            stock_data = fetch_stock_data(ticker_symbol)
-            # Display the DataFrame using st.dataframe
-            with st.container():
-                st.dataframe(stock_data)
+            ticker = finn_data[selected_company]
+            st.write(f"Ticker Symbol for {selected_company}: {ticker}")
+            # Button to train the model
+            train_button = st.button("Train Model")
+            if train_button:
+                st.write("Training the model...")
+                predictor = StockModelTrainerPredictor(ticker)
+
+            # Button to fetch and combine data for model training
+            fetch_data_button = st.button("Fetch Data for Training")
+            if fetch_data_button:
+                with st.spinner("Fetching and combining data for training..."):
+                    # Use the class method to fetch and combine data
+                    combined_data = predictor.get_combined_data()
+                    data_is_ready = True  # Set data_is_ready to True once data is ready
+                # Display the combined data as a DataFrame
+                st.success("Data is ready for model training!")
+                st.dataframe(combined_data)
+
+                # Check a condition to determine whether to show the training button
+                if data_is_ready:
+                    # Place the "Train Model" button next to the "Fetch Data for Training" button
+                    col1, col2 = st.columns(2)
+                    with col1:
+                        # Button to train the model
+                        train_model_button = st.button("Train Model")
+
+                    if train_model_button:
+                        # Call the train_model() method from your class
+                        trained_model = predictor.train_model()
+
+                        # Save the trained model as a .h5 file
+                        model_filename = f"{selected_company}_model.h5"
+                        trained_model.save(model_filename)
+
+                        # Provide a link to download the model file
+                        st.success("Model training complete! You can download the model below.")
+                        st.markdown(f"**[Download Trained Model]({model_filename})**", unsafe_allow_html=True)
         else:
-            st.write("Please select a financial company.")
+            st.write("Please select a financial company.") 
     elif selected_category == "Technology":
         selected_company = st.selectbox("Select a Technology Company", list(tech_data.keys()))
         if selected_company in tech_data:
-            ticker_symbol = tech_data[selected_company]
-            st.write(f"Ticker Symbol for {selected_company}: {ticker_symbol}")
-            st.header((f"{selected_company}Historical Stock Data:"))
-            # Fetch historical stock data using Alpha Vantage API
-            stock_data = fetch_stock_data(ticker_symbol)
-            # Display the DataFrame using st.dataframe
-            with st.container():
-                st.dataframe(stock_data)
+            ticker = tech_data[selected_company]
+            st.write(f"Ticker Symbol for {selected_company}: {ticker}")
+            predictor = StockModelTrainerPredictor(ticker)
+
+            # Button to fetch and combine data for model training
+            fetch_data_button = st.button("Fetch Data for Training")
+            if fetch_data_button:
+                with st.spinner("Fetching and combining data for training..."):
+                    # Use the class method to fetch and combine data
+                    combined_data = predictor.get_combined_data()
+                    data_is_ready = True  # Set data_is_ready to True once data is ready
+                # Display the combined data as a DataFrame
+                st.success("Data is ready for model training!")
+                st.dataframe(combined_data)
+
+                # Check a condition to determine whether to show the training button
+                if data_is_ready:
+                    # Place the "Train Model" button next to the "Fetch Data for Training" button
+                    col1, col2 = st.columns(2)
+                    with col1:
+                        # Button to train the model
+                        train_model_button = st.button("Train Model")
+
+                    if train_model_button:
+                        # Call the train_model() method from your class
+                        trained_model = predictor.train_model()
+
+                        # Save the trained model as a .h5 file
+                        model_filename = f"{selected_company}_model.h5"
+                        trained_model.save(model_filename)
+
+                        # Provide a link to download the model file
+                        st.success("Model training complete! You can download the model below.")
+                        st.markdown(f"**[Download Trained Model]({model_filename})**", unsafe_allow_html=True)
         else:
             st.write("Please select a technology company.")
-
-        
-        
-        
 
 
 if __name__ == "__main__":
