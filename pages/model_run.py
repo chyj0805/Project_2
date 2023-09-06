@@ -168,9 +168,15 @@ def train_and_cache_model(predictor):
         # Call the train_model() method from your class
         predictor.train_model()
         
+        predictions_df = predictor.make_predictions()
+        st.dataframe(predictions_df)
         # Save the trained model to a file
         predictor.save_model()  # Add this line to save the model
         st.success("Model has been trained successfully and saved!")
+
+        
+        
+
         
         return predictor  # Return the trained predictor object
 
@@ -238,43 +244,45 @@ def main():
                 # Train and cache the model
                 predictor = train_and_cache_model(predictor)
 
-            # Button to download the trained model
-            if data_is_ready:
-                # ... (Rest of your code for visualization and prediction)
-                visualize_whole_data_button = st.sidebar.button("Visualize Results - Whole Data")
-                if visualize_whole_data_button:
-                    # Call the visualize_results_whole() method from your class
-                    predictor.visualize_results_whole()
+                
 
-                # Button to visualize results for the next 60 days
-                visualize_60_days_button = st.sidebar.button("Visualize Results - Next 60 Days")
-                if visualize_60_days_button:
-                    # Call the visualize_results_60days() method from your class
-                    predictor.visualize_results_60days()
+            # # Button to download the trained model
+            # if data_is_ready:
+            #     # ... (Rest of your code for visualization and prediction)
+            #     visualize_whole_data_button = st.sidebar.button("Visualize Results - Whole Data")
+            #     if visualize_whole_data_button:
+            #         # Call the visualize_results_whole() method from your class
+            #         predictor.visualize_results_whole()
 
-                # Button to calculate and display average RMSE
-                calculate_rmse_button = st.sidebar.button("Calculate Average RMSE")
-                if calculate_rmse_button:
-                    # Call the calculate_average_rmse() method from your class
-                    predictor.calculate_average_rmse()
+            #     # Button to visualize results for the next 60 days
+            #     visualize_60_days_button = st.sidebar.button("Visualize Results - Next 60 Days")
+            #     if visualize_60_days_button:
+            #         # Call the visualize_results_60days() method from your class
+            #         predictor.visualize_results_60days()
 
-                # Button to calculate and display average MAPE
-                calculate_mape_button = st.sidebar.button("Calculate Average MAPE")
-                if calculate_mape_button:
-                    # Call the calculate_average_mape() method from your class
-                    predictor.calculate_average_mape()
+            #     # Button to calculate and display average RMSE
+            #     calculate_rmse_button = st.sidebar.button("Calculate Average RMSE")
+            #     if calculate_rmse_button:
+            #         # Call the calculate_average_rmse() method from your class
+            #         predictor.calculate_average_rmse()
 
-                # Button to calculate and display average Pearson correlation coefficient
-                calculate_corr_button = st.sidebar.button("Calculate Average Pearson Correlation")
-                if calculate_corr_button:
-                    # Call the calculate_average_pearson_corr() method from your class
-                    predictor.calculate_average_pearson_corr()
+            #     # Button to calculate and display average MAPE
+            #     calculate_mape_button = st.sidebar.button("Calculate Average MAPE")
+            #     if calculate_mape_button:
+            #         # Call the calculate_average_mape() method from your class
+            #         predictor.calculate_average_mape()
 
-                # Button to predict and visualize the next 60 days
-                predict_60_days_button = st.sidebar.button("Predict Next 60 Days")
-                if predict_60_days_button:
-                    # Call the predict_next_60_days() method from your class
-                    predictor.predict_next_60_days()
-                # Button to visualize results for the whole data
+            #     # Button to calculate and display average Pearson correlation coefficient
+            #     calculate_corr_button = st.sidebar.button("Calculate Average Pearson Correlation")
+            #     if calculate_corr_button:
+            #         # Call the calculate_average_pearson_corr() method from your class
+            #         predictor.calculate_average_pearson_corr()
+
+            #     # Button to predict and visualize the next 60 days
+            #     predict_60_days_button = st.sidebar.button("Predict Next 60 Days")
+            #     if predict_60_days_button:
+            #         # Call the predict_next_60_days() method from your class
+            #         predictor.predict_next_60_days()
+            #     # Button to visualize results for the whole data
 if __name__ == "__main__":
     main()

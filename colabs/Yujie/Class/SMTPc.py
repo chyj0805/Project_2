@@ -19,6 +19,7 @@ import requests
 import pandas as pd
 import os
 from dotenv import load_dotenv
+import streamlit as st
      
 
 '''
@@ -244,7 +245,7 @@ class StockModelTrainerPredictor:
 
         model_lstm.compile(optimizer='adam', loss='mean_squared_error', metrics=[self.root_mean_squared_error])
 
-        model_lstm.fit(x_train_actual, y_train_actual, epochs=30, batch_size=32, validation_data=(x_val, y_val))
+        model_lstm.fit(x_train_actual, y_train_actual, epochs=3, batch_size=32, validation_data=(x_val, y_val))
 
         self.model = model_lstm
         # Save the model with a name based on the stock ticker
@@ -252,7 +253,7 @@ class StockModelTrainerPredictor:
         self.model.save(model_path)
         print(f"Model saved to {model_path}")
 
-    def save_model(self, save_dir="..\Project_2\assests"):
+    def save_model(self, save_dir=r"C:\Users\scott\OneDrive\Documents\GitHub\Project_2\assests"):
         """
         Save the trained model to a file.
 
@@ -267,8 +268,13 @@ class StockModelTrainerPredictor:
         model_path = os.path.join(save_dir, model_filename)
 
         # Save the model
-        save_model(self.model, model_path)
-        print(f"Model saved to {model_path}")
+        if hasattr(self, 'model'):
+        # Save the model using the Keras save method
+            self.model.save(model_path)
+            print(f"Model saved to {model_path}")
+        else:
+            print("No model has been trained or loaded. Nothing to save.")
+            print(f"Model saved to {model_path}")
 
     def predict_with_pretrained_model(self):
         if not hasattr(self, 'model'):
@@ -285,7 +291,6 @@ class StockModelTrainerPredictor:
         self.predictions = self.scaler_y.inverse_transform(predictions_scaled)
 
     def visualize_results_whole(self):
-       def visualize_results_whole(self):
         # First Day
         y_test_first_day = self.y_test[:, 0]
         y_test_inv_first_day = self.scaler_y.inverse_transform(y_test_first_day)
@@ -375,7 +380,7 @@ class StockModelTrainerPredictor:
 
         # Calculate the average RMSE
         average_rmse = np.mean(rmse_values)
-        return print(f'{self.ticker} Average RMSE: {average_rmse}')
+        return average_rmse
 
     def mean_absolute_percentage_error(self, y_true, y_pred):
         y_true, y_pred = np.array(y_true), np.array(y_pred)
@@ -398,7 +403,7 @@ class StockModelTrainerPredictor:
 
         # Calculate the average MAPE
         average_mape = np.mean(mape_values)
-        return print(f'{self.ticker} Average MAPE: {average_mape}')
+        return average_mape
 
     def calculate_average_pearson_corr(self):
         # Initialize an empty list to store Pearson correlation coefficients for each window
@@ -415,7 +420,7 @@ class StockModelTrainerPredictor:
 
         # Calculate the average Pearson correlation coefficient
         average_corr = np.mean(corr_values)
-        return print(f'{self.ticker} Average Pearson Correlation Coefficient: {average_corr}')
+        return average_corr
 
     def predict_next_60_days(self):
         self.get_combined_data()
