@@ -115,7 +115,7 @@ class StockModelTrainerPredictor:
         stock_macd_df = self.get_stock_historical_data_with_MACD(interval, series_type)
          # Get the latest date from stock_macd_df
         latest_stock_date = stock_macd_df['Date'].max()
-
+        # Start Cusotmization
         # Fetch Federal Funds Rate Data
         rate_url = f'https://www.alphavantage.co/query?function=FEDERAL_FUNDS_RATE&interval={interval}&apikey={self.api_key}'
         rate_data = requests.get(rate_url).json()
@@ -161,7 +161,7 @@ class StockModelTrainerPredictor:
         cpi_df = pd.DataFrame({'CPI': cpi_values}, index=cpi_dates)
         cpi_df.index = pd.to_datetime(cpi_df.index)
         cpi_df = cpi_df.resample('D').ffill()
-
+        # Stop Customization
         # Merge all DataFrames
         stock_macd_df['Date'] = pd.to_datetime(stock_macd_df['Date'])
         combined_df = pd.merge(stock_macd_df, fed_df, left_on='Date', right_index=True, how='left')
@@ -227,7 +227,7 @@ class StockModelTrainerPredictor:
     def load_model(self, model_path):
         if os.path.exists(model_path):
             self.model = load_model(model_path, custom_objects={'root_mean_squared_error': self.root_mean_squared_error})
-            print("Model loaded from ", model_path)
+            print("Model loaded from", model_path)
         else:
             print(f"No model found at {model_path}. Consider training a new model.")
 
@@ -250,6 +250,24 @@ class StockModelTrainerPredictor:
         # Save the model with a name based on the stock ticker
         model_path = f"{self.ticker}_model.h5"
         self.model.save(model_path)
+        print(f"Model saved to {model_path}")
+
+    def save_model(self, save_dir="..\Project_2\assests"):
+        """
+        Save the trained model to a file.
+
+        Args:
+            save_dir (str): Directory where the model will be saved.
+        """
+        # Ensure the save directory exists
+        os.makedirs(save_dir, exist_ok=True)
+
+        # Define the filename for the saved model
+        model_filename = f"{self.ticker}_model.h5"
+        model_path = os.path.join(save_dir, model_filename)
+
+        # Save the model
+        save_model(self.model, model_path)
         print(f"Model saved to {model_path}")
 
     def predict_with_pretrained_model(self):

@@ -162,6 +162,18 @@ tech_data = {
     'Hewlett Packard Enterprise Company': 'HPE'
 }
 
+@st.cache(allow_output_mutation=True)
+def train_and_cache_model(predictor):
+    with st.spinner("Training the model..."):
+        # Call the train_model() method from your class
+        predictor.train_model()
+        
+        # Save the trained model to a file
+        predictor.save_model()  # Add this line to save the model
+        st.success("Model has been trained successfully and saved!")
+        
+        return predictor  # Return the trained predictor object
+
 def main():
     st.title("Stock Prediction Model")
 
@@ -216,17 +228,19 @@ def main():
 
                 # Automatically preprocess data
                 with st.spinner("Preprocessing data..."):
+                    # Set the ticker attribute for the predictor object
+                    predictor.ticker = ticker_symbol
+
                     # Call the preprocess_data() method from your class
                     predictor.preprocess_data()
                 st.success("Data has been preprocessed successfully!")
 
-                # Automatically train the model
-                with st.spinner("Training the model..."):
-                    # Call the train_model() method from your class
-                    predictor.train_model()
-                st.success("Model has been trained successfully!")
+                # Train and cache the model
+                predictor = train_and_cache_model(predictor)
+
             # Button to download the trained model
             if data_is_ready:
+                # ... (Rest of your code for visualization and prediction)
                 visualize_whole_data_button = st.sidebar.button("Visualize Results - Whole Data")
                 if visualize_whole_data_button:
                     # Call the visualize_results_whole() method from your class
