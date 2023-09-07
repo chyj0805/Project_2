@@ -50,6 +50,7 @@ def main():
             st.write("Visualizations:")
             model_predictor.visualize_results_whole()
             model_predictor.visualize_results_60days()
+            model_predictor.predict_next_60_days()
         else:
             st.write("Error: Unable to fetch combined data.")
 

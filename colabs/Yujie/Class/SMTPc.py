@@ -245,7 +245,7 @@ class StockModelTrainerPredictor:
 
         model_lstm.compile(optimizer='adam', loss='mean_squared_error', metrics=[self.root_mean_squared_error])
 
-        model_lstm.fit(x_train_actual, y_train_actual, epochs=3, batch_size=32, validation_data=(x_val, y_val))
+        model_lstm.fit(x_train_actual, y_train_actual, epochs=30, batch_size=32, validation_data=(x_val, y_val))
 
         self.model = model_lstm
         # Save the model with a name based on the stock ticker
